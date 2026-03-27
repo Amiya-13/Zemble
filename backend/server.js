@@ -8,6 +8,8 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import projectRoutes from './routes/projects.js';
 import proposalRoutes from './routes/proposals.js';
+import userRoutes from './routes/users.js';
+import squadRoutes from './routes/squads.js';
 
 // Import models for review functionality
 import Review from './models/Review.js';
@@ -24,10 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
 console.log('🔄 Connecting to MongoDB Atlas...');
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
         console.log('✅ MongoDB Atlas Connected Successfully!');
         console.log('📊 Database: zemble');
@@ -49,8 +48,10 @@ mongoose.connection.on('reconnected', () => {
 
 // Use routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/proposals', proposalRoutes);
+app.use('/api/squads', squadRoutes);
 
 // ========== REVIEW ROUTES ==========
 

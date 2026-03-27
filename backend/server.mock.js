@@ -142,7 +142,7 @@ app.post('/api/auth/login', async (req, res) => {
 
         const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
 
-        res.json({
+        const response = {
             success: true,
             message: 'Login successful',
             token,
@@ -155,7 +155,10 @@ app.post('/api/auth/login', async (req, res) => {
                 stats: user.stats,
                 rating: user.rating
             }
-        });
+        };
+        
+        console.log('📤 Sending response:', JSON.stringify(response, null, 2));
+        res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

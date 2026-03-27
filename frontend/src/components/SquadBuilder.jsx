@@ -1,22 +1,50 @@
-import React, { useState } from 'react';
-import { Transfer, Tag, Card, Button } from 'antd';
-import { FireOutlined, TeamOutlined, StarOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Transfer, Tag, Card, Button, message, Spin, Form, Input, InputNumber, Divider } from 'antd';
+import { FireOutlined, TeamOutlined, StarOutlined, DollarOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 const SquadBuilder = () => {
-    // Mock freelancer data
-    const mockData = [
-        { key: '1', title: 'Sarah Chen', description: 'Senior React Developer', tags: ['React', 'TypeScript', 'Node'], rating: 4.9 },
-        { key: '2', title: 'Marcus Williams', description: 'Full-Stack Engineer', tags: ['React', 'Node', 'MongoDB'], rating: 4.8 },
-        { key: '3', title: 'Aisha Patel', description: 'UI/UX Designer', tags: ['Figma', 'Design', 'Branding'], rating: 5.0 },
-        { key: '4', title: 'James Rodriguez', description: 'Backend Specialist', tags: ['Node', 'Python', 'Docker'], rating: 4.7 },
-        { key: '5', title: 'Emily Zhang', description: 'DevOps Engineer', tags: ['AWS', 'Docker', 'CI/CD'], rating: 4.9 },
-        { key: '6', title: 'David Kim', description: 'React Native Developer', tags: ['React', 'Mobile', 'iOS'], rating: 4.6 },
-        { key: '7', title: 'Sofia Martinez', description: 'Data Scientist', tags: ['Python', 'ML', 'Analytics'], rating: 4.8 },
-        { key: '8', title: 'Alex Turner', description: 'Frontend Architect', tags: ['React', 'Vue', 'Performance'], rating: 5.0 },
-    ];
-
+    const { projectId } = useParams();
+    const navigate = useNavigate();
+    const [project, setProject] = useState(null);
+    const [availableTalent, setAvailableTalent] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
     const [targetKeys, setTargetKeys] = useState([]);
     const [selectedKeys, setSelectedKeys] = useState([]);
+    const [form] = Form.useForm();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch Project context
+                if (projectId) {
+                    const projRes = await axios.get(`http://localhost:5000/api/projects/${projectId}`);
+                    setProject(projRes.data.project);
+                }
+
+                // Fetch Available Talent
+                const response = await axios.get('http://localhost:5000/api/users/freelancers');
+                const formatted = response.data.freelancers.map(f => ({
+                    key: f._id,
+                    title: `${f.profile?.firstName || f.username} ${f.profile?.lastName || ''}`.trim() || f.username,
+                    description: f.profile?.bio || 'Freelancer Specialization',
+                    tags: f.profile?.skills || [],
+                    rating: f.rating?.average || 0
+                }));
+                // Filter out the current user
+                const currentUser = JSON.parse(localStorage.getItem('user'));
+                setAvailableTalent(formatted.filter(f => f.key !== currentUser?.id && f.key !== currentUser?._id));
+            } catch (error) {
+                console.error('Failed to fetch data', error);
+                message.error('Failed to load builder data');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [projectId]);
 
     // Calculate compatibility score based on shared tags
     const calculateCompatibilityScore = (selectedFreelancers) => {
@@ -52,8 +80,45 @@ const SquadBuilder = () => {
     };
 
     // Get selected freelancers
-    const selectedFreelancers = mockData.filter(item => targetKeys.includes(item.key));
+    const selectedFreelancers = availableTalent.filter(item => targetKeys.includes(item.key));
     const compatibility = calculateCompatibilityScore(selectedFreelancers);
+
+    const handleAnchorSquad = async (values) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            message.warning('You must be logged in to build a squad');
+            navigate('/login');
+            return;
+        }
+
+        if (targetKeys.length === 0) {
+            message.warning('Please add at least one freelancer to your squad');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await axios.post(
+                'http://localhost:5000/api/proposals/squad',
+                { 
+                    projectId,
+                    targetIds: targetKeys,
+                    coverLetter: values.coverLetter,
+                    bidAmount: values.bidAmount,
+                    deliveryTime: { value: values.deliveryDays, unit: 'days' }
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            message.success('Squad Proposal Dispatched! Invitations sent to all members.');
+            setTargetKeys([]); // Clear selection on success
+            form.resetFields();
+            setTimeout(() => navigate('/dashboard/freelancer'), 2000);
+        } catch (error) {
+            message.error(error.response?.data?.error || 'Failed to dispatch squad proposal');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     // Custom render for each item
     const renderItem = (item) => {
@@ -90,6 +155,13 @@ const SquadBuilder = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-12">
+                    {project && (
+                        <div className="mb-6 inline-block bg-white px-6 py-2 rounded-full shadow-sm border border-gray-200">
+                            Building a Squad for: <span className="font-bold text-blue-600">{project.title}</span> 
+                            <span className="mx-2 text-gray-300">|</span> 
+                            Budget: <span className="text-green-600 font-semibold">${project.budget?.min} - ${project.budget?.max}</span>
+                        </div>
+                    )}
                     <Tag color="purple" className="px-4 py-1 text-sm mb-4">
                         <TeamOutlined className="mr-2" />
                         Squad Builder
@@ -102,6 +174,8 @@ const SquadBuilder = () => {
                     </p>
                 </div>
 
+                <div className="grid lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-8">
                 {/* Compatibility Score Banner */}
                 {targetKeys.length >= 2 && (
                     <div className={`glass rounded-2xl p-6 mb-8 border-2 ${compatibility.score >= 90 ? 'border-orange-500 bg-orange-50/50' : 'border-blue-500 bg-blue-50/50'
@@ -138,9 +212,14 @@ const SquadBuilder = () => {
                 )}
 
                 {/* Transfer Component */}
-                <Card className="shadow-2xl rounded-2xl overflow-hidden">
-                    <Transfer
-                        dataSource={mockData}
+                <Card className="shadow-2xl rounded-2xl overflow-hidden min-h-[550px]">
+                    {loading ? (
+                        <div className="flex justify-center items-center h-[500px]">
+                            <Spin size="large" tip="Loading Top Talent..." />
+                        </div>
+                    ) : (
+                        <Transfer
+                            dataSource={availableTalent}
                         titles={['Available Talent', 'Your Squad']}
                         targetKeys={targetKeys}
                         selectedKeys={selectedKeys}
@@ -153,21 +232,22 @@ const SquadBuilder = () => {
                         }}
                         className="squad-transfer"
                     />
+                    )}
                 </Card>
 
                 {/* Squad Summary */}
                 {targetKeys.length > 0 && (
-                    <div className="mt-8 glass rounded-2xl p-8">
+                    <div className="glass rounded-2xl p-8">
                         <h3 className="text-2xl font-bold mb-6">Your Squad Summary</h3>
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
                                 <div className="text-sm font-semibold text-gray-600 mb-2">Team Size</div>
-                                <div className="text-3xl font-bold">{targetKeys.length} Members</div>
+                                <div className="text-3xl font-bold">{targetKeys.length + 1} Members <span className="text-sm text-gray-400 font-normal">(including you)</span></div>
                             </div>
                             <div>
                                 <div className="text-sm font-semibold text-gray-600 mb-2">Avg. Rating</div>
                                 <div className="text-3xl font-bold">
-                                    {(selectedFreelancers.reduce((sum, f) => sum + f.rating, 0) / selectedFreelancers.length).toFixed(1)}
+                                    {(selectedFreelancers.reduce((sum, f) => sum + f.rating, 0) / Math.max(1, selectedFreelancers.length)).toFixed(1)}
                                     <StarOutlined className="text-yellow-500 ml-2" />
                                 </div>
                             </div>
@@ -183,23 +263,86 @@ const SquadBuilder = () => {
                                 ))}
                             </div>
                         </div>
-
-                        <div className="mt-8 flex justify-end">
-                            <Button
-                                type="primary"
-                                size="large"
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 border-none h-12 px-8 text-base font-semibold"
-                            >
-                                Anchor This Squad →
-                            </Button>
-                        </div>
                     </div>
                 )}
 
                 {/* Instructions */}
-                <div className="mt-8 text-center text-gray-500 text-sm">
+                <div className="text-center text-gray-500 text-sm">
                     <p>💡 Tip: Select freelancers with overlapping skills to boost compatibility!</p>
                 </div>
+                </div>
+
+                {/* Proposal Submission Sidebar */}
+                <div className="lg:col-span-1">
+                    <Card className="rounded-2xl shadow-xl sticky top-6 border-t-4 border-orange-500">
+                        <h2 className="text-2xl font-bold mb-2">Dispatch Squad Proposal</h2>
+                        <p className="text-gray-500 mb-6 text-sm">Lock in your team and submit your collective bid.</p>
+                        
+                        <Form
+                            form={form}
+                            layout="vertical"
+                            onFinish={handleAnchorSquad}
+                        >
+                            <Form.Item
+                                name="coverLetter"
+                                label="Squad Pitch / Cover Letter"
+                                rules={[{ required: true, message: 'Please write a pitch detailing why your squad is perfect!' }]}
+                            >
+                                <Input.TextArea
+                                    rows={8}
+                                    placeholder="Explain how your newly formed squad will successfully deliver this project..."
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="bidAmount"
+                                label="Total Squad Bid ($)"
+                                rules={[{ required: true, message: 'Please enter your combined total bid' }]}
+                            >
+                                <InputNumber
+                                    min={1}
+                                    className="w-full"
+                                    prefix={<DollarOutlined />}
+                                    size="large"
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="deliveryDays"
+                                label="Estimated Delivery (Days)"
+                                rules={[{ required: true, message: 'Please enter the delivery estimate' }]}
+                            >
+                                <InputNumber
+                                    min={1}
+                                    className="w-full"
+                                    prefix={<ClockCircleOutlined />}
+                                    size="large"
+                                />
+                            </Form.Item>
+
+                            <Divider />
+
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={submitting}
+                                    size="large"
+                                    disabled={targetKeys.length === 0}
+                                    className="w-full bg-gradient-to-r from-orange-500 to-amber-500 border-none h-14 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                >
+                                    <FireOutlined /> Anchor Squad & Submit Proposal
+                                </Button>
+                                {targetKeys.length === 0 && (
+                                    <div className="text-center text-red-500 text-xs mt-2">
+                                        *You must add at least 1 member to your squad to submit a Squad Proposal.
+                                    </div>
+                                )}
+                            </Form.Item>
+                        </Form>
+                    </Card>
+                </div>
+            </div>
             </div>
 
             <style jsx>{`

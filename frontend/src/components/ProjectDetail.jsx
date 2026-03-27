@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Card, Tag, Button, Form, Input, InputNumber, message, Spin, Divider } from 'antd';
-import { ClockCircleOutlined, DollarOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Tag, Button, Form, Input, InputNumber, message, Spin, Divider, List, Avatar } from 'antd';
+import { ClockCircleOutlined, DollarOutlined, UserOutlined, CheckCircleOutlined, TeamOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
@@ -10,9 +10,12 @@ const ProjectDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [project, setProject] = useState(null);
+    const [proposals, setProposals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [form] = Form.useForm();
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    const isOwner = (currentUser?.id || currentUser?._id) === project?.client?._id;
 
     useEffect(() => {
         fetchProject();
@@ -21,9 +24,19 @@ const ProjectDetail = () => {
     const fetchProject = async () => {
         try {
             const response = await axios.get(`${API_URL}/projects/${id}`);
-            setProject(response.data.project);
+            const projectData = response.data.project;
+            setProject(projectData);
+
+            // If the current user is the owner, fetch the proposals
+            if ((currentUser?.id || currentUser?._id) === projectData.client?._id) {
+                const token = localStorage.getItem('token');
+                const propsRes = await axios.get(`${API_URL}/proposals/project/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setProposals(propsRes.data.proposals);
+            }
         } catch (error) {
-            message.error('Failed to load project');
+            message.error('Failed to load project details');
         } finally {
             setLoading(false);
         }
@@ -55,6 +68,19 @@ const ProjectDetail = () => {
             message.error(error.response?.data?.error || 'Failed to submit proposal');
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const handleAcceptProposal = async (proposalId) => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${API_URL}/proposals/${proposalId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            message.success('Proposal accepted successfully! The project is now in-progress.');
+            fetchProject(); // Refresh to update project status and proposals list
+        } catch (error) {
+            message.error(error.response?.data?.error || 'Failed to accept proposal');
         }
     };
 
@@ -128,63 +154,147 @@ const ProjectDetail = () => {
                             </div>
                         </Card>
 
-                        {/* Submit Proposal Form */}
-                        <Card className="rounded-2xl shadow-xl">
-                            <h2 className="text-2xl font-bold mb-6">Submit Your Proposal</h2>
-                            <Form
-                                form={form}
-                                layout="vertical"
-                                onFinish={handleSubmitProposal}
-                            >
-                                <Form.Item
-                                    name="coverLetter"
-                                    label="Cover Letter"
-                                    rules={[{ required: true, message: 'Please write a cover letter' }]}
-                                >
-                                    <Input.TextArea
-                                        rows={6}
-                                        placeholder="Explain why you're the best fit for this project..."
-                                    />
-                                </Form.Item>
+                        {/* Conditional Section: Owner sees proposals, Freelancers see submission form */}
+                        {isOwner ? (
+                            <Card className="rounded-2xl shadow-xl">
+                                <h2 className="text-2xl font-bold mb-6">Proposals Received ({proposals.length})</h2>
+                                {proposals.length === 0 ? (
+                                    <p className="text-gray-500">No proposals have been submitted for this project yet.</p>
+                                ) : (
+                                    <List
+                                        itemLayout="vertical"
+                                        dataSource={proposals}
+                                        renderItem={proposal => (
+                                            <List.Item className="border border-gray-200 rounded-lg mb-4 p-6 bg-white shadow-sm">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex gap-4">
+                                                        <Avatar size={48} className="bg-gradient-to-r from-amber-400 to-orange-500">
+                                                            {proposal.freelancer?.username?.[0]?.toUpperCase()}
+                                                        </Avatar>
+                                                        <div>
+                                                            <div className="text-lg font-bold">{proposal.freelancer?.username}</div>
+                                                            <div className="text-gray-500 text-sm">Feedback Rating: ★ {proposal.freelancer?.rating?.average || 0}</div>
+                                                        </div>
+                                                    </div>
+                                                    <Tag color={proposal.status === 'pending' ? 'gold' : proposal.status === 'accepted' ? 'green' : 'red'}>
+                                                        {proposal.status.toUpperCase()}
+                                                    </Tag>
+                                                </div>
 
-                                <Form.Item
-                                    name="bidAmount"
-                                    label="Your Bid Amount ($)"
-                                    rules={[{ required: true, message: 'Please enter your bid' }]}
-                                >
-                                    <InputNumber
-                                        min={1}
-                                        className="w-full"
-                                        prefix={<DollarOutlined />}
-                                        size="large"
-                                    />
-                                </Form.Item>
+                                                <div className="grid grid-cols-2 gap-4 mb-4 bg-gray-50 p-4 rounded-lg">
+                                                    <div>
+                                                        <div className="text-xs text-gray-500 uppercase tracking-wide">Bid Amount</div>
+                                                        <div className="text-xl font-bold text-green-600">${proposal.bidAmount}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-xs text-gray-500 uppercase tracking-wide">Delivery Time</div>
+                                                        <div className="text-xl font-semibold">{proposal.deliveryTime?.value} {proposal.deliveryTime?.unit}</div>
+                                                    </div>
+                                                </div>
 
-                                <Form.Item
-                                    name="deliveryDays"
-                                    label="Delivery Time (Days)"
-                                    rules={[{ required: true, message: 'Please enter delivery time' }]}
-                                >
-                                    <InputNumber
-                                        min={1}
-                                        className="w-full"
-                                        size="large"
-                                    />
-                                </Form.Item>
+                                                <div className="mb-6">
+                                                    <div className="font-semibold mb-2">Cover Letter:</div>
+                                                    <p className="text-gray-700 whitespace-pre-wrap">{proposal.coverLetter}</p>
+                                                </div>
 
-                                <Form.Item>
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        loading={submitting}
-                                        size="large"
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 border-none"
-                                    >
-                                        Submit Proposal
-                                    </Button>
-                                </Form.Item>
-                            </Form>
-                        </Card>
+                                                {project.status === 'open' && proposal.status === 'pending' && (
+                                                    <Button 
+                                                        type="primary" 
+                                                        size="large" 
+                                                        icon={<CheckCircleOutlined />} 
+                                                        className="bg-gradient-to-r from-green-500 to-emerald-600 border-none w-full"
+                                                        onClick={() => handleAcceptProposal(proposal._id)}
+                                                    >
+                                                        Accept this Proposal & Allocate Project
+                                                    </Button>
+                                                )}
+                                                {project.assignedTo === proposal.freelancer?._id && (
+                                                    <div className="text-center font-bold text-green-600 bg-green-50 p-3 rounded-lg border border-green-200">
+                                                        <CheckCircleOutlined className="mr-2" /> This freelancer has been allocated to the project.
+                                                    </div>
+                                                )}
+                                            </List.Item>
+                                        )}
+                                    />
+                                )}
+                            </Card>
+                        ) : (
+                            <Card className="rounded-2xl shadow-xl">
+                                <h2 className="text-2xl font-bold mb-6">Submit Your Proposal</h2>
+                                {project.status === 'open' ? (
+                                    <>
+                                        <Form
+                                            form={form}
+                                            layout="vertical"
+                                            onFinish={handleSubmitProposal}
+                                        >
+                                            <Form.Item
+                                                name="coverLetter"
+                                                label="Cover Letter"
+                                                rules={[{ required: true, message: 'Please write a cover letter' }]}
+                                            >
+                                                <Input.TextArea
+                                                    rows={6}
+                                                    placeholder="Explain why you're the best fit for this project..."
+                                                />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="bidAmount"
+                                                label="Your Bid Amount ($)"
+                                                rules={[{ required: true, message: 'Please enter your bid' }]}
+                                            >
+                                                <InputNumber
+                                                    min={1}
+                                                    className="w-full"
+                                                    prefix={<DollarOutlined />}
+                                                    size="large"
+                                                />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="deliveryDays"
+                                                label="Delivery Time (Days)"
+                                                rules={[{ required: true, message: 'Please enter delivery time' }]}
+                                            >
+                                                <InputNumber
+                                                    min={1}
+                                                    className="w-full"
+                                                    size="large"
+                                                />
+                                            </Form.Item>
+
+                                            <Form.Item>
+                                                <Button
+                                                    type="primary"
+                                                    htmlType="submit"
+                                                    loading={submitting}
+                                                    size="large"
+                                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 border-none"
+                                                >
+                                                    Submit Individual Proposal
+                                                </Button>
+                                            </Form.Item>
+                                        </Form>
+                                        
+                                        <Divider className="my-6">OR</Divider>
+
+                                        <Button
+                                            type="default"
+                                            size="large"
+                                            onClick={() => navigate(`/squad-builder/${id}`)}
+                                            className="w-full h-14 border-2 border-orange-400 text-orange-600 bg-orange-50 hover:bg-orange-100 font-bold text-lg shadow-sm flex items-center justify-center gap-2"
+                                        >
+                                            <TeamOutlined /> Form a Squad to Tackle This Project
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <div className="text-center p-6 bg-gray-50 rounded-lg">
+                                        <p className="text-lg text-gray-600">This project is no longer accepting new proposals.</p>
+                                    </div>
+                                )}
+                            </Card>
+                        )}
                     </div>
 
                     {/* Sidebar */}

@@ -1,20 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Card, Button, Statistic, Row, Col, List, Avatar } from 'antd';
-import { LogoutOutlined, DollarOutlined, ProjectOutlined, TeamOutlined } from '@ant-design/icons';
+import { Card, Button, Statistic, Row, Col, List, Avatar, Tabs, Spin, Empty, Tag, Rate } from 'antd';
+import { LogoutOutlined, DollarOutlined, ProjectOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const ClientDashboard = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const [myProjects, setMyProjects] = useState([]);
+    const [freelancers, setFreelancers] = useState([]);
+    const [loadingData, setLoadingData] = useState(false);
+    const [activeTab, setActiveTab] = useState('projects');
 
     useEffect(() => {
         const userData = localStorage.getItem('user');
-        if (!userData) {
+        const token = localStorage.getItem('token');
+        if (!userData || !token) {
             navigate('/login');
             return;
         }
         setUser(JSON.parse(userData));
+        fetchDashboardData(token);
     }, [navigate]);
+
+    const fetchDashboardData = async (token) => {
+        setLoadingData(true);
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            const [projectsRes, freelancersRes] = await Promise.all([
+                axios.get('http://localhost:5000/api/projects/my/projects', { headers }),
+                axios.get('http://localhost:5000/api/users/freelancers') // Public route
+            ]);
+            setMyProjects(projectsRes.data.projects || []);
+            setFreelancers(freelancersRes.data.freelancers || []);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        } finally {
+            setLoadingData(false);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -106,10 +130,10 @@ const ClientDashboard = () => {
                                 >
                                     Post New Project
                                 </Button>
-                                <Button size="large" block onClick={() => navigate('/browse')}>
+                                <Button size="large" block onClick={() => { setActiveTab('projects'); window.scrollTo({ top: 800, behavior: 'smooth' }); }}>
                                     View My Projects
                                 </Button>
-                                <Button size="large" block onClick={() => navigate('/browse')}>
+                                <Button size="large" block onClick={() => { setActiveTab('freelancers'); window.scrollTo({ top: 800, behavior: 'smooth' }); }}>
                                     Browse Freelancers
                                 </Button>
                             </div>
@@ -139,9 +163,102 @@ const ClientDashboard = () => {
                     </Col>
                 </Row>
 
-                {/* Recent Activity */}
-                <Card title="📝 Recent Projects" className="mt-6 rounded-xl shadow-lg">
-                    <p className="text-gray-500">Your posted projects will appear here</p>
+                {/* Tabs for Projects and Freelancers */}
+                <Card className="rounded-xl shadow-lg mt-8 mb-8 border border-white/60 bg-white/80 backdrop-blur-md">
+                    {loadingData ? (
+                        <div className="text-center py-12"><Spin size="large" /></div>
+                    ) : (
+                        <Tabs
+                            activeKey={activeTab}
+                            onChange={setActiveTab}
+                            size="large"
+                            tabBarStyle={{ marginBottom: 24 }}
+                            items={[
+                                {
+                                    key: 'projects',
+                                    label: <span className="text-lg font-semibold"><ProjectOutlined /> My Posted Projects ({myProjects.length})</span>,
+                                    children: (
+                                        <div className="pt-2">
+                                            {myProjects.length === 0 ? (
+                                                <Empty description="You haven't posted any projects yet." />
+                                            ) : (
+                                                <List
+                                                    grid={{ gutter: 16, column: 2 }}
+                                                    dataSource={myProjects}
+                                                    renderItem={project => (
+                                                        <List.Item>
+                                                            <Card hoverable className="h-full border border-gray-200" onClick={() => navigate(`/project/${project._id}`)}>
+                                                                <div className="flex justify-between items-start mb-2">
+                                                                    <Tag color="blue" className="mb-2">{project.category}</Tag>
+                                                                    <Tag color={project.status === 'open' ? 'green' : 'gold'}>{project.status.toUpperCase()}</Tag>
+                                                                </div>
+                                                                <h3 className="text-xl font-bold mb-2">{project.title}</h3>
+                                                                <p className="text-gray-500 text-sm mb-4 line-clamp-2">{project.description}</p>
+                                                                <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-auto">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-xs text-gray-400">Budget</span>
+                                                                        <span className="font-semibold text-green-600">${project.budget?.min} - ${project.budget?.max}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col text-right">
+                                                                        <span className="text-xs text-gray-400">Proposals</span>
+                                                                        <span className="font-semibold">{project.proposalCount || 0}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </Card>
+                                                        </List.Item>
+                                                    )}
+                                                />
+                                            )}
+                                        </div>
+                                    )
+                                },
+                                {
+                                    key: 'freelancers',
+                                    label: <span className="text-lg font-semibold"><TeamOutlined /> Browse Freelancers ({freelancers.length})</span>,
+                                    children: (
+                                        <div className="pt-2">
+                                            {freelancers.length === 0 ? (
+                                                <Empty description="No freelancers available right now." />
+                                            ) : (
+                                                <List
+                                                    grid={{ gutter: 24, column: 1 }}
+                                                    dataSource={freelancers}
+                                                    renderItem={freelancer => (
+                                                        <List.Item>
+                                                            <Card hoverable className="border border-gray-200" onClick={() => navigate(`/freelancer/${freelancer._id}`)}>
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <Avatar size={64} src={freelancer.profile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${freelancer.username}`} className="bg-gradient-to-r from-amber-400 to-orange-500" />
+                                                                        <div>
+                                                                            <h3 className="text-xl font-bold">{freelancer.profile?.firstName} {freelancer.profile?.lastName}</h3>
+                                                                            <div className="text-gray-500 mb-1">{freelancer.profile?.bio || 'Freelancer'}</div>
+                                                                            <div className="flex gap-2 min-h-[22px]">
+                                                                                {freelancer.profile?.skills?.slice(0, 4).map(skill => (
+                                                                                    <Tag key={skill} color="orange" className="border-orange-200">{skill}</Tag>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="text-right flex flex-col items-end">
+                                                                        <div className="text-2xl font-bold text-amber-600 mb-1">${freelancer.profile?.hourlyRate || 0}/hr</div>
+                                                                        <div className="flex items-center mb-1 text-sm bg-orange-50 px-2 py-1 rounded">
+                                                                            <Rate disabled defaultValue={freelancer.rating?.average || 0} allowHalf className="text-sm text-amber-500" />
+                                                                            <span className="ml-1 font-semibold text-amber-600">{freelancer.rating?.average || 0}</span>
+                                                                        </div>
+                                                                        <span className="text-gray-500 text-xs text-right">📍 {freelancer.profile?.location || 'Remote'}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </Card>
+                                                        </List.Item>
+                                                    )}
+                                                />
+                                            )}
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
+                    )}
                 </Card>
             </div>
         </div>

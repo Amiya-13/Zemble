@@ -1,6 +1,7 @@
 import Proposal from '../models/Proposal.js';
 import Project from '../models/Project.js';
 import User from '../models/User.js';
+import Squad from '../models/Squad.js';
 
 // Submit proposal (freelancers only)
 export const submitProposal = async (req, res) => {
@@ -44,6 +45,59 @@ export const submitProposal = async (req, res) => {
         await project.save();
 
         res.status(201).json({ success: true, proposal });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Submit squad proposal
+export const submitSquadProposal = async (req, res) => {
+    try {
+        const freelancer = await User.findById(req.userId);
+        if (freelancer.userType !== 'freelancer') {
+            return res.status(403).json({ error: 'Only freelancers can submit proposals' });
+        }
+
+        const { projectId, coverLetter, bidAmount, deliveryTime, targetIds } = req.body;
+
+        const project = await Project.findById(projectId);
+        if (!project || project.status !== 'open') {
+            return res.status(400).json({ error: 'Project is not accepting proposals' });
+        }
+
+        // Check if leader already submitted
+        const existing = await Proposal.findOne({ project: projectId, freelancer: req.userId });
+        if (existing) {
+            return res.status(400).json({ error: 'You have already submitted a proposal for this project' });
+        }
+
+        // Create the Squad
+        const invites = targetIds.filter(id => id !== req.userId);
+        const squad = new Squad({
+            project: projectId,
+            leader: req.userId,
+            members: [req.userId],
+            pendingInvites: invites
+        });
+        await squad.save();
+
+        // Create the Proposal
+        const proposal = new Proposal({
+            project: projectId,
+            freelancer: req.userId, // Stored as the leader
+            squad: squad._id,
+            coverLetter,
+            bidAmount,
+            deliveryTime
+        });
+        await proposal.save();
+
+        // Update project
+        project.proposals.push(proposal._id);
+        project.proposalCount += 1;
+        await project.save();
+
+        res.status(201).json({ success: true, proposal, squad });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -139,4 +193,4 @@ export const getMyProposals = async (req, res) => {
     }
 };
 
-export default { submitProposal, getProjectProposals, acceptProposal, rejectProposal, getMyProposals };
+export default { submitProposal, submitSquadProposal, getProjectProposals, acceptProposal, rejectProposal, getMyProposals };

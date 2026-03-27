@@ -7,7 +7,8 @@ import {
     MailOutlined,
     LinkedinOutlined,
     GithubOutlined,
-    TrophyOutlined
+    TrophyOutlined,
+    TeamOutlined
 } from '@ant-design/icons';
 
 const FreelancerProfile = () => {
@@ -109,11 +110,11 @@ const FreelancerProfile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-6">
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 py-12 px-6">
             <div className="max-w-5xl mx-auto">
                 {/* Profile Header Card */}
-                <Card className="shadow-2xl rounded-2xl mb-8 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-32"></div>
+                <Card className="shadow-premium rounded-2xl mb-8 overflow-hidden border-white/60 bg-white/80 backdrop-blur-md">
+                    <div className="bg-gradient-to-r from-amber-400 to-orange-500 h-32"></div>
                     <div className="px-8 pb-8">
                         <div className="flex flex-col md:flex-row items-start md:items-end -mt-16 mb-6">
                             <Avatar
@@ -126,8 +127,8 @@ const FreelancerProfile = () => {
                                     <h1 className="text-3xl font-bold">{freelancer.name}</h1>
                                     {freelancer.openToAnchoring && (
                                         <Tag
-                                            color="blue"
-                                            className="px-4 py-1 text-base font-bold border-2 border-blue-500"
+                                            color="orange"
+                                            className="px-4 py-1 text-base font-bold border-2 border-orange-500 bg-orange-50"
                                         >
                                             ⚓ Open to Anchoring
                                         </Tag>
@@ -141,20 +142,29 @@ const FreelancerProfile = () => {
                                 </div>
                             </div>
                             <div className="mt-4 md:mt-0 text-right">
-                                <div className="text-3xl font-bold text-blue-600 mb-2">
+                                <div className="text-3xl font-bold text-amber-600 mb-2">
                                     {freelancer.hourlyRate}
                                 </div>
-                                <div className="flex items-center justify-end mb-3">
-                                    <Rate disabled defaultValue={freelancer.rating} allowHalf className="text-lg" />
+                                <div className="flex items-center justify-end mb-4">
+                                    <Rate disabled defaultValue={freelancer.rating} allowHalf className="text-lg text-amber-500" />
                                     <span className="ml-2 font-semibold">{freelancer.rating}</span>
                                 </div>
-                                <Button
-                                    type="primary"
-                                    size="large"
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-semibold"
-                                >
-                                    Anchor Sarah →
-                                </Button>
+                                <div className="flex gap-3 justify-end wrap">
+                                    <Button
+                                        size="large"
+                                        icon={<TeamOutlined />}
+                                        className="font-semibold hover:border-amber-500 hover:text-amber-600 transition-all shadow-sm"
+                                    >
+                                        Build a Squad
+                                    </Button>
+                                    <Button
+                                        type="primary"
+                                        size="large"
+                                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border-none font-semibold shadow-premium text-white"
+                                    >
+                                        Anchor Sarah →
+                                    </Button>
+                                </div>
                             </div>
                         </div>
 
@@ -171,7 +181,7 @@ const FreelancerProfile = () => {
                             <h3 className="font-semibold text-lg mb-3">Skills</h3>
                             <div className="flex flex-wrap gap-2">
                                 {freelancer.skills.map(skill => (
-                                    <Tag key={skill} color="blue" className="px-4 py-1 text-base">
+                                    <Tag key={skill} color="orange" className="px-4 py-1 text-base border-orange-200">
                                         {skill}
                                     </Tag>
                                 ))}
@@ -188,19 +198,19 @@ const FreelancerProfile = () => {
                 </Card>
 
                 {/* Reviews Section */}
-                <Card className="shadow-2xl rounded-2xl">
+                <Card className="shadow-premium rounded-2xl border-white/60 bg-white/80 backdrop-blur-md">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold">
                             Reviews ({reviews.length})
                         </h2>
-                        <Tag color="blue" className="px-3 py-1">
+                        <Tag color="orange" className="px-3 py-1">
                             <TrophyOutlined className="mr-1" />
                             AI-Verified Reviews
                         </Tag>
                     </div>
 
                     {/* Review Stats */}
-                    <div className="bg-blue-50 rounded-xl p-4 mb-6">
+                    <div className="bg-orange-50/50 rounded-xl p-4 mb-6 border border-orange-100">
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <div className="text-2xl font-bold text-green-600">

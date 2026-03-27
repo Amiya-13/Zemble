@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Input, Button, Radio, message, Card } from 'antd';
+import { Form, Input, Button, Radio, Card, App as AntdApp } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -8,6 +8,7 @@ const API_URL = 'http://localhost:5000/api';
 
 const AuthPage = () => {
     const navigate = useNavigate();
+    const { message } = AntdApp.useApp();
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
 

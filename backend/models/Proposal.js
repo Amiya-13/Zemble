@@ -11,6 +11,10 @@ const proposalSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    squad: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Squad'
+    },
     coverLetter: {
         type: String,
         required: true

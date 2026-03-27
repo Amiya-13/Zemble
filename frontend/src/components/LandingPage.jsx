@@ -46,9 +46,7 @@ const LandingPage = () => {
                         <span className="text-2xl font-bold text-gradient">Zembl</span>
                     </div>
                     <div className="hidden md:flex space-x-8">
-                        <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 transition">How It Works</a>
-                        <a onClick={() => navigate('/post-project')} className="text-gray-600 hover:text-gray-900 transition cursor-pointer">For Clients</a>
-                        <a onClick={() => navigate('/browse')} className="text-gray-600 hover:text-gray-900 transition cursor-pointer">For Talent</a>
+                        <a onClick={() => navigate('/how-it-works')} className="text-gray-600 hover:text-amber-600 transition cursor-pointer font-medium">How It Works</a>
                     </div>
                     <div className="flex space-x-4">
                         <Button type="text" onClick={() => navigate('/login')}>Sign In</Button>
@@ -66,9 +64,6 @@ const LandingPage = () => {
                         {/* Left Side - Copy */}
                         <div className="space-y-8">
                             <div className="space-y-4">
-                                <Tag color="blue" className="px-4 py-1 text-sm">
-                                    🔥 AI-Powered Verification
-                                </Tag>
                                 <h1 className="text-6xl font-bold leading-tight">
                                     Don't Just Hire.
                                     <br />
@@ -86,17 +81,9 @@ const LandingPage = () => {
                                     size="large"
                                     icon={<RocketOutlined />}
                                     onClick={() => navigate('/browse')}
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none h-12 px-8 text-base font-semibold hover:shadow-lg transition-all"
+                                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border-none shadow-premium transition-all duration-300 transform hover:-translate-y-0.5 h-12 px-8 text-base font-semibold text-white"
                                 >
                                     Browse Projects
-                                </Button>
-                                <Button
-                                    size="large"
-                                    icon={<TeamOutlined />}
-                                    onClick={() => navigate('/squad-builder')}
-                                    className="h-12 px-8 text-base font-semibold hover:border-blue-600 hover:text-blue-600 transition-all"
-                                >
-                                    Build a Squad
                                 </Button>
                             </div>
 
