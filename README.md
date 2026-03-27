@@ -1,4 +1,4 @@
-# Zembl - Premium Freelancer Marketplace
+# Zemble - Premium Freelancer Marketplace
 
 A full-featured freelancer marketplace with AI-powered review verification, built with MERN stack.
 
