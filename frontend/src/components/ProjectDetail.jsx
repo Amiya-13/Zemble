@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, Tag, Button, Form, Input, InputNumber, message, Spin, Divider, List, Avatar } from 'antd';
-import {
-    ClockCircleOutlined, DollarOutlined, SolutionOutlined,
-    TeamOutlined, UserOutlined, ArrowLeftOutlined,
-    RocketOutlined, CheckCircleOutlined, InfoCircleOutlined,
-    StarOutlined, SendOutlined
-} from '@ant-design/icons';
-import api from '../services/api';
+import { ClockCircleOutlined, DollarOutlined, UserOutlined, CheckCircleOutlined, TeamOutlined } from '@ant-design/icons';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 const ProjectDetail = () => {
     const { id } = useParams();
@@ -26,13 +23,16 @@ const ProjectDetail = () => {
 
     const fetchProject = async () => {
         try {
-            const response = await api.getProject(id);
+            const response = await axios.get(`${API_URL}/projects/${id}`);
             const projectData = response.data.project;
             setProject(projectData);
 
-            // If client viewing their own project, fetch proposals
+            // If the current user is the owner, fetch the proposals
             if ((currentUser?.id || currentUser?._id) === projectData.client?._id) {
-                const propsRes = await api.getProjectProposals(id);
+                const token = localStorage.getItem('token');
+                const propsRes = await axios.get(`${API_URL}/proposals/project/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 setProposals(propsRes.data.proposals);
             }
         } catch (error) {
@@ -103,7 +103,7 @@ const ProjectDetail = () => {
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                     <Link to="/" className="flex items-center space-x-2">
                         <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zembl</span>
+                        <span className="text-2xl font-bold text-gradient">Zemble</span>
                     </Link>
                     <Button onClick={() => navigate('/browse')}>← Back to Browse</Button>
                 </div>
@@ -204,7 +204,7 @@ const ProjectDetail = () => {
 
                                                 {proposal.squad && (
                                                     <div className="mb-6 pt-4 border-t border-gray-100">
-                                                        <div className="text-sm font-semibold tracking-wide text-gray-500 uppercase mb-3">Proposed Squad: {proposal.squad.name} ({(proposal.squad.members?.length || 0) + (proposal.squad.pendingInvites?.length || 0)} Members)</div>
+                                                        <div className="text-sm font-semibold tracking-wide text-gray-500 uppercase mb-3">Proposed Squad: {proposal.squad.name} ({proposal.squad.members?.length} Members)</div>
                                                         <Avatar.Group maxCount={5} maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}>
                                                             {proposal.squad.members.map(member => (
                                                                 <Avatar key={member._id} size="large" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`} tooltip={member.profile?.firstName || member.username} />

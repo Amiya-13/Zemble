@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Transfer, Tag, Card, Button, message, Spin, Form, Input, InputNumber, Divider } from 'antd';
 import { FireOutlined, TeamOutlined, StarOutlined, DollarOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from '../services/api';
+import axios from 'axios';
 
 const SquadBuilder = () => {
     const { projectId } = useParams();
@@ -13,7 +13,6 @@ const SquadBuilder = () => {
     const [submitting, setSubmitting] = useState(false);
     const [targetKeys, setTargetKeys] = useState([]);
     const [selectedKeys, setSelectedKeys] = useState([]);
-    const [allProjects, setAllProjects] = useState([]);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -21,18 +20,12 @@ const SquadBuilder = () => {
             try {
                 // Fetch Project context
                 if (projectId) {
-                    const projRes = await api.getProject(projectId);
+                    const projRes = await axios.get(`http://localhost:5000/api/projects/${projectId}`);
                     setProject(projRes.data.project);
                 }
 
-                // Fetch all projects if no projectId is provided
-                if (!projectId) {
-                    const projectsRes = await api.getProjects();
-                    setAllProjects(projectsRes.data.projects.filter(p => p.status === 'open'));
-                }
-
                 // Fetch Available Talent
-                const response = await api.getFreelancers();
+                const response = await axios.get('http://localhost:5000/api/users/freelancers');
                 const formatted = response.data.freelancers.map(f => ({
                     key: f._id,
                     title: `${f.profile?.firstName || f.username} ${f.profile?.lastName || ''}`.trim() || f.username,
@@ -105,14 +98,18 @@ const SquadBuilder = () => {
 
         setSubmitting(true);
         try {
-            await api.submitSquadProposal({
-                projectId,
-                squadName: values.squadName,
-                targetIds: targetKeys,
-                coverLetter: values.coverLetter,
-                bidAmount: values.bidAmount,
-                deliveryTime: { value: values.deliveryDays, unit: 'days' }
-            });
+            await axios.post(
+                'http://localhost:5000/api/proposals/squad',
+                {
+                    projectId,
+                    squadName: values.squadName,
+                    targetIds: targetKeys,
+                    coverLetter: values.coverLetter,
+                    bidAmount: values.bidAmount,
+                    deliveryTime: { value: values.deliveryDays, unit: 'days' }
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             message.success('Squad Proposal Dispatched! Invitations sent to all members.');
             setTargetKeys([]); // Clear selection on success
             form.resetFields();
@@ -176,24 +173,6 @@ const SquadBuilder = () => {
                     <p className="text-xl text-gray-600">
                         Assemble elite teams with AI-calculated compatibility scores
                     </p>
-
-                    {!projectId && (
-                        <Card className="mt-8 max-w-2xl mx-auto border-2 border-dashed border-blue-300 bg-blue-50/30">
-                            <h3 className="text-lg font-semibold mb-4 text-blue-800">Choose a Project to Anchor Your Squad</h3>
-                            <div className="flex flex-wrap gap-3 justify-center">
-                                {allProjects.map(p => (
-                                    <Button
-                                        key={p._id}
-                                        onClick={() => navigate(`/squad-builder/${p._id}`)}
-                                        className="hover:scale-105 transition-transform"
-                                    >
-                                        {p.title}
-                                    </Button>
-                                ))}
-                                {allProjects.length === 0 && <p className="text-gray-500 italic">No open projects available to bid on right now.</p>}
-                            </div>
-                        </Card>
-                    )}
                 </div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
@@ -359,7 +338,7 @@ const SquadBuilder = () => {
                                         htmlType="submit"
                                         loading={submitting}
                                         size="large"
-                                        disabled={targetKeys.length === 0 || !projectId}
+                                        disabled={targetKeys.length === 0}
                                         className="w-full bg-gradient-to-r from-orange-500 to-amber-500 border-none h-14 text-lg font-bold shadow-md hover:shadow-lg transition-all"
                                     >
                                         <FireOutlined /> Anchor Squad & Submit Proposal

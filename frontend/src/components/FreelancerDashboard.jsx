@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, Button, Statistic, Row, Col, List, Tag, Avatar, Tabs, Spin, Empty, message } from 'antd';
-import {
-    UserOutlined, ProjectOutlined, RocketOutlined,
-    ClockCircleOutlined, SolutionOutlined, CheckCircleOutlined,
-    TeamOutlined, DollarOutlined, SearchOutlined, BellOutlined
-} from '@ant-design/icons';
-import api from '../services/api';
+import { LogoutOutlined, UserOutlined, DollarOutlined, ProjectOutlined, TrophyOutlined, FileTextOutlined, TeamOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const FreelancerDashboard = () => {
     const navigate = useNavigate();
@@ -33,9 +29,9 @@ const FreelancerDashboard = () => {
         try {
             const headers = { Authorization: `Bearer ${token}` };
             const [proposalsRes, projectsRes, invitesRes] = await Promise.all([
-                api.getMyProposals(),
-                api.getProjects(),
-                api.getInvites()
+                axios.get('http://localhost:5000/api/proposals/my/proposals', { headers }),
+                axios.get('http://localhost:5000/api/projects/my/projects', { headers }),
+                axios.get('http://localhost:5000/api/squads/invites', { headers })
             ]);
             setMyProposals(proposalsRes.data.proposals || []);
             setMyProjects(projectsRes.data.projects || []);
@@ -50,7 +46,9 @@ const FreelancerDashboard = () => {
     const handleAcceptInvite = async (squadId) => {
         const token = localStorage.getItem('token');
         try {
-            await api.acceptInvite(squadId);
+            await axios.put(`http://localhost:5000/api/squads/${squadId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             message.success('Squad invitation accepted! You are now successfully anchored to the team.');
             fetchDashboardData(token);
         } catch (error) {
@@ -73,7 +71,7 @@ const FreelancerDashboard = () => {
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                     <Link to="/" className="flex items-center space-x-2">
                         <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zembl</span>
+                        <span className="text-2xl font-bold text-gradient">Zemble</span>
                     </Link>
                     <div className="flex items-center gap-4">
                         <div className="text-right">

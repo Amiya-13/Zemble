@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Radio, Card, App as AntdApp } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
-import api from '../services/api';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 const AuthPage = () => {
     const navigate = useNavigate();
@@ -13,12 +15,8 @@ const AuthPage = () => {
     const onFinish = async (values) => {
         setLoading(true);
         try {
-            let response;
-            if (isLogin) {
-                response = await api.login({ email: values.email, password: values.password });
-            } else {
-                response = await api.register(values);
-            }
+            const endpoint = isLogin ? '/auth/login' : '/auth/register';
+            const response = await axios.post(`${API_URL}${endpoint}`, values);
 
             // Store token and user data
             localStorage.setItem('token', response.data.token);
@@ -45,7 +43,7 @@ const AuthPage = () => {
                 <div className="text-center mb-8">
                     <div className="text-5xl mb-4">⚓</div>
                     <h1 className="text-3xl font-bold mb-2">
-                        {isLogin ? 'Welcome Back' : 'Join Zembl'}
+                        {isLogin ? 'Welcome Back' : 'Join Zemble'}
                     </h1>
                     <p className="text-gray-600">
                         {isLogin ? 'Sign in to your account' : 'Create your account'}

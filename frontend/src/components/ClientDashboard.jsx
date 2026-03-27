@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, Button, Statistic, Row, Col, List, Avatar, Tabs, Spin, Empty, Tag, Rate } from 'antd';
-import { PlusOutlined, ProjectOutlined, UserOutlined, ClockCircleOutlined, SolutionOutlined, CheckCircleOutlined, TeamOutlined, DollarOutlined, FileTextOutlined } from '@ant-design/icons';
-import api from '../services/api';
+import { LogoutOutlined, DollarOutlined, ProjectOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const ClientDashboard = () => {
     const navigate = useNavigate();
@@ -26,10 +26,10 @@ const ClientDashboard = () => {
     const fetchDashboardData = async (token) => {
         setLoadingData(true);
         try {
-            // The 'headers' constant is no longer needed here if api service handles auth
+            const headers = { Authorization: `Bearer ${token}` };
             const [projectsRes, freelancersRes] = await Promise.all([
-                api.getProjects(), // Replaced manual axios call with api service
-                api.getFreelancers() // Assuming api.getFreelancers() exists and replaces the public route
+                axios.get('http://localhost:5000/api/projects/my/projects', { headers }),
+                axios.get('http://localhost:5000/api/users/freelancers') // Public route
             ]);
             setMyProjects(projectsRes.data.projects || []);
             setFreelancers(freelancersRes.data.freelancers || []);
@@ -55,7 +55,7 @@ const ClientDashboard = () => {
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                     <Link to="/" className="flex items-center space-x-2">
                         <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zembl</span>
+                        <span className="text-2xl font-bold text-gradient">Zemble</span>
                     </Link>
                     <div className="flex items-center gap-4">
                         <div className="text-right">

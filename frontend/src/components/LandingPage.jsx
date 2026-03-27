@@ -43,7 +43,7 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                         <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zembl</span>
+                        <span className="text-2xl font-bold text-gradient">Zemble</span>
                     </div>
                     <div className="hidden md:flex space-x-8">
                         <a onClick={() => navigate('/how-it-works')} className="text-gray-600 hover:text-amber-600 transition cursor-pointer font-medium">How It Works</a>
@@ -202,7 +202,7 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold mb-4">
-                            Why <span className="text-gradient">Zembl</span>?
+                            ⚓ <span className="text-gradient">Zemble</span> Marketplace?
                         </h2>
                     </div>
 
@@ -239,10 +239,10 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto text-center">
                     <div className="flex items-center justify-center space-x-2 mb-4">
                         <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold">Zembl</span>
+                        <span className="text-2xl font-bold">Zemble</span>
                     </div>
                     <p className="text-gray-400">
-                        © 2026 Zembl. Premium Freelancer Marketplace.
+                        © 2026 Zemble. Premium Freelancer Marketplace.
                     </p>
                 </div>
             </footer>

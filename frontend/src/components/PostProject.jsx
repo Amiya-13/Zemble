@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, InputNumber, Select, Button, Card, message } from 'antd';
-import { PlusOutlined, RocketOutlined, DollarOutlined, ClockCircleOutlined, TagsOutlined, FileTextOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import api from '../services/api';
+import { PlusOutlined } from '@ant-design/icons';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 const PostProject = () => {
     const navigate = useNavigate();
@@ -33,7 +35,9 @@ const PostProject = () => {
                 skills: values.skills?.split(',').map(s => s.trim()) || []
             };
 
-            await api.createProject(values);
+            await axios.post(`${API_URL}/projects`, projectData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
             message.success('Project posted successfully!');
             navigate('/browse');
@@ -51,7 +55,7 @@ const PostProject = () => {
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                     <Link to="/" className="flex items-center space-x-2">
                         <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zembl</span>
+                        <span className="text-2xl font-bold text-gradient">Zemble</span>
                     </Link>
                     <Button onClick={() => navigate('/browse')}>← Back to Browse</Button>
                 </div>
