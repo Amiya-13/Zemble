@@ -14,7 +14,15 @@ import squadRoutes from './routes/squads.js';
 // Import models
 import Review from './models/Review.js';
 
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const envPath = path.join(__dirname, '.env');
+console.log(`📂 Loading .env from: ${envPath}`);
+dotenv.config({ path: envPath });
 
 const app = express();
 const sentiment = new Sentiment();
@@ -30,8 +38,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
-console.log('🔄 Connecting to MongoDB Atlas...');
-mongoose.connect(process.env.MONGODB_URI)
+console.log('🔄 Connecting to MongoDB...');
+const dbUri = process.env.MONGODB_URI;
+if (!dbUri) {
+  console.error('❌ CRITICAL: MONGODB_URI is not defined in environment variables!');
+} else {
+  console.log(`📡 URI prefix: ${dbUri.substring(0, 15)}...`);
+}
+
+mongoose.connect(dbUri)
   .then(() => {
     console.log('✅ MongoDB Atlas Connected Successfully!');
     console.log('📊 Database: zemble');
