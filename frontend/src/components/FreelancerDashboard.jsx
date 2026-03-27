@@ -196,8 +196,8 @@ const FreelancerDashboard = () => {
 
                 {/* Pending Squad Invites */}
                 {myInvites.length > 0 && (
-                    <Card 
-                        title={<span className="text-xl text-orange-600"><TeamOutlined className="mr-2"/> Pending Squad Invitations</span>} 
+                    <Card
+                        title={<span className="text-xl text-orange-600"><TeamOutlined className="mr-2" /> Pending Squad Invitations</span>}
                         className="mt-6 rounded-xl shadow-lg border-2 border-orange-300 bg-orange-50/30 backdrop-blur"
                     >
                         <List
@@ -207,8 +207,8 @@ const FreelancerDashboard = () => {
                                 <List.Item
                                     className="bg-white p-4 rounded-lg mb-2 shadow-sm border border-orange-100"
                                     actions={[
-                                        <Button 
-                                            type="primary" 
+                                        <Button
+                                            type="primary"
                                             onClick={() => handleAcceptInvite(squad._id)}
                                             className="bg-gradient-to-r from-orange-500 to-amber-500 border-none font-bold shadow-md"
                                         >
@@ -218,7 +218,7 @@ const FreelancerDashboard = () => {
                                 >
                                     <List.Item.Meta
                                         avatar={<Avatar size="large" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${squad.leader?.username}`} className="bg-orange-200" />}
-                                        title={<span className="font-bold text-lg">{squad.leader?.profile?.firstName || squad.leader?.username} invited you to join their Squad!</span>}
+                                        title={<span className="font-bold text-lg">{squad.leader?.profile?.firstName || squad.leader?.username} invited you to join '{squad.name}'!</span>}
                                         description={`Current Team Members: ${squad.members.map(m => m.profile?.firstName || m.username).join(', ')}`}
                                     />
                                 </List.Item>

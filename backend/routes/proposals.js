@@ -1,7 +1,5 @@
 import express from 'express';
 import { submitProposal, submitSquadProposal, getProjectProposals, acceptProposal, rejectProposal, getMyProposals } from '../controllers/proposalController.js';
-import express from 'express';
-import { submitProposal, submitSquadProposal, getProjectProposals, acceptProposal, rejectProposal, getMyProposals } from '../controllers/proposalController.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();

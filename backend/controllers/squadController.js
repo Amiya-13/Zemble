@@ -4,7 +4,7 @@ import User from '../models/User.js';
 export const createSquad = async (req, res) => {
     try {
         const { targetIds } = req.body; // Array of invited user IDs
-        
+
         // Ensure the leader is not inviting themselves
         const invites = targetIds.filter(id => id !== req.userId);
 
@@ -35,7 +35,7 @@ export const getMyInvites = async (req, res) => {
 export const acceptInvite = async (req, res) => {
     try {
         const squad = await Squad.findById(req.params.id);
-        
+
         if (!squad) {
             return res.status(404).json({ error: 'Squad not found' });
         }
@@ -43,15 +43,15 @@ export const acceptInvite = async (req, res) => {
         if (!squad.pendingInvites.includes(req.userId)) {
             return res.status(400).json({ error: 'You do not have a pending invite for this squad' });
         }
-        
+
         // Remove from pending
         squad.pendingInvites = squad.pendingInvites.filter(id => id.toString() !== req.userId);
-        
+
         // Add to members
         if (!squad.members.includes(req.userId)) {
             squad.members.push(req.userId);
         }
-        
+
         await squad.save();
         res.json({ success: true, squad, message: 'Invite accepted successfully' });
     } catch (error) {

@@ -58,7 +58,7 @@ export const submitSquadProposal = async (req, res) => {
             return res.status(403).json({ error: 'Only freelancers can submit proposals' });
         }
 
-        const { projectId, coverLetter, bidAmount, deliveryTime, targetIds } = req.body;
+        const { projectId, squadName, coverLetter, bidAmount, deliveryTime, targetIds } = req.body;
 
         const project = await Project.findById(projectId);
         if (!project || project.status !== 'open') {
@@ -74,6 +74,7 @@ export const submitSquadProposal = async (req, res) => {
         // Create the Squad
         const invites = targetIds.filter(id => id !== req.userId);
         const squad = new Squad({
+            name: squadName || 'Unnamed Squad',
             project: projectId,
             leader: req.userId,
             members: [req.userId],
@@ -117,7 +118,11 @@ export const getProjectProposals = async (req, res) => {
         }
 
         const proposals = await Proposal.find({ project: req.params.projectId })
-            .populate('freelancer', 'username profile rating stats')
+            .populate('freelancer', 'username profile rating')
+            .populate({
+                path: 'squad',
+                populate: { path: 'members', select: 'username profile rating' }
+            })
             .sort({ createdAt: -1 });
 
         res.json({ success: true, proposals });
@@ -145,7 +150,14 @@ export const acceptProposal = async (req, res) => {
         // Update project
         const project = await Project.findById(proposal.project._id);
         project.status = 'in-progress';
-        project.assignedTo = proposal.freelancer;
+
+        if (proposal.squad) {
+            const squad = await Squad.findById(proposal.squad);
+            project.assignedTo = squad.members;
+        } else {
+            project.assignedTo = [proposal.freelancer];
+        }
+
         await project.save();
 
         res.json({ success: true, proposal, message: 'Proposal accepted' });

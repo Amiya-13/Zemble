@@ -45,10 +45,10 @@ const projectSchema = new mongoose.Schema({
         enum: ['open', 'in-progress', 'completed', 'cancelled', 'disputed'],
         default: 'open'
     },
-    assignedTo: {
+    assignedTo: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    },
+    }],
     proposals: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Proposal'

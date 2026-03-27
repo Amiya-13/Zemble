@@ -167,12 +167,17 @@ const ProjectDetail = () => {
                                         renderItem={proposal => (
                                             <List.Item className="border border-gray-200 rounded-lg mb-4 p-6 bg-white shadow-sm">
                                                 <div className="flex justify-between items-start mb-4">
-                                                    <div className="flex gap-4">
+                                                    <div className="flex gap-4 items-center">
                                                         <Avatar size={48} className="bg-gradient-to-r from-amber-400 to-orange-500">
                                                             {proposal.freelancer?.username?.[0]?.toUpperCase()}
                                                         </Avatar>
                                                         <div>
-                                                            <div className="text-lg font-bold">{proposal.freelancer?.username}</div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-lg font-bold">{proposal.freelancer?.username}</span>
+                                                                {proposal.squad && (
+                                                                    <Tag color="purple" icon={<TeamOutlined />}>SQUAD BID</Tag>
+                                                                )}
+                                                            </div>
                                                             <div className="text-gray-500 text-sm">Feedback Rating: ★ {proposal.freelancer?.rating?.average || 0}</div>
                                                         </div>
                                                     </div>
@@ -197,20 +202,31 @@ const ProjectDetail = () => {
                                                     <p className="text-gray-700 whitespace-pre-wrap">{proposal.coverLetter}</p>
                                                 </div>
 
+                                                {proposal.squad && (
+                                                    <div className="mb-6 pt-4 border-t border-gray-100">
+                                                        <div className="text-sm font-semibold tracking-wide text-gray-500 uppercase mb-3">Proposed Squad: {proposal.squad.name} ({proposal.squad.members?.length} Members)</div>
+                                                        <Avatar.Group maxCount={5} maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}>
+                                                            {proposal.squad.members.map(member => (
+                                                                <Avatar key={member._id} size="large" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`} tooltip={member.profile?.firstName || member.username} />
+                                                            ))}
+                                                        </Avatar.Group>
+                                                    </div>
+                                                )}
+
                                                 {project.status === 'open' && proposal.status === 'pending' && (
-                                                    <Button 
-                                                        type="primary" 
-                                                        size="large" 
-                                                        icon={<CheckCircleOutlined />} 
+                                                    <Button
+                                                        type="primary"
+                                                        size="large"
+                                                        icon={<CheckCircleOutlined />}
                                                         className="bg-gradient-to-r from-green-500 to-emerald-600 border-none w-full"
                                                         onClick={() => handleAcceptProposal(proposal._id)}
                                                     >
                                                         Accept this Proposal & Allocate Project
                                                     </Button>
                                                 )}
-                                                {project.assignedTo === proposal.freelancer?._id && (
-                                                    <div className="text-center font-bold text-green-600 bg-green-50 p-3 rounded-lg border border-green-200">
-                                                        <CheckCircleOutlined className="mr-2" /> This freelancer has been allocated to the project.
+                                                {project.assignedTo?.includes(proposal.freelancer?._id) && (
+                                                    <div className="text-center font-bold text-green-600 bg-green-50 p-3 mt-4 rounded-lg border border-green-200">
+                                                        <CheckCircleOutlined className="mr-2" /> This proposal was officially accepted and allocated!
                                                     </div>
                                                 )}
                                             </List.Item>
@@ -276,7 +292,7 @@ const ProjectDetail = () => {
                                                 </Button>
                                             </Form.Item>
                                         </Form>
-                                        
+
                                         <Divider className="my-6">OR</Divider>
 
                                         <Button

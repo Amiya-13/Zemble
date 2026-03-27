@@ -102,6 +102,7 @@ const SquadBuilder = () => {
                 'http://localhost:5000/api/proposals/squad',
                 { 
                     projectId,
+                    squadName: values.squadName,
                     targetIds: targetKeys,
                     coverLetter: values.coverLetter,
                     bidAmount: values.bidAmount,
@@ -215,7 +216,9 @@ const SquadBuilder = () => {
                 <Card className="shadow-2xl rounded-2xl overflow-hidden min-h-[550px]">
                     {loading ? (
                         <div className="flex justify-center items-center h-[500px]">
-                            <Spin size="large" tip="Loading Top Talent..." />
+                            <Spin size="large" tip="Loading Top Talent...">
+                                <div className="w-10 h-10" />
+                            </Spin>
                         </div>
                     ) : (
                         <Transfer
@@ -284,6 +287,13 @@ const SquadBuilder = () => {
                             onFinish={handleAnchorSquad}
                         >
                             <Form.Item
+                                name="squadName"
+                                label="Squad Name (Optional)"
+                            >
+                                <Input placeholder="e.g. The Dream Team" size="large" />
+                            </Form.Item>
+
+                            <Form.Item
                                 name="coverLetter"
                                 label="Squad Pitch / Cover Letter"
                                 rules={[{ required: true, message: 'Please write a pitch detailing why your squad is perfect!' }]}
@@ -345,14 +355,14 @@ const SquadBuilder = () => {
             </div>
             </div>
 
-            <style jsx>{`
-        .squad-transfer :global(.ant-transfer-list-header) {
+            <style>{`
+        .squad-transfer .ant-transfer-list-header {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           font-weight: 600;
         }
         
-        .squad-transfer :global(.ant-transfer-list-header-title) {
+        .squad-transfer .ant-transfer-list-header-title {
           color: white;
         }
       `}</style>
