@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, Button, Statistic, Row, Col, List, Avatar, Tabs, Spin, Empty, Tag, Rate } from 'antd';
-import { LogoutOutlined, DollarOutlined, ProjectOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import { PlusOutlined, ProjectOutlined, UserOutlined, ClockCircleOutlined, SolutionOutlined, CheckCircleOutlined, TeamOutlined, DollarOutlined, FileTextOutlined } from '@ant-design/icons';
+import api from '../services/api';
 
 const ClientDashboard = () => {
     const navigate = useNavigate();
@@ -26,10 +26,10 @@ const ClientDashboard = () => {
     const fetchDashboardData = async (token) => {
         setLoadingData(true);
         try {
-            const headers = { Authorization: `Bearer ${token}` };
+            // The 'headers' constant is no longer needed here if api service handles auth
             const [projectsRes, freelancersRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/projects/my/projects', { headers }),
-                axios.get('http://localhost:5000/api/users/freelancers') // Public route
+                api.getProjects(), // Replaced manual axios call with api service
+                api.getFreelancers() // Assuming api.getFreelancers() exists and replaces the public route
             ]);
             setMyProjects(projectsRes.data.projects || []);
             setFreelancers(freelancersRes.data.freelancers || []);

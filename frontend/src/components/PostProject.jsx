@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, InputNumber, Select, Button, Card, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
+import { PlusOutlined, RocketOutlined, DollarOutlined, ClockCircleOutlined, TagsOutlined, FileTextOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import api from '../services/api';
 
 const PostProject = () => {
     const navigate = useNavigate();
@@ -35,9 +33,7 @@ const PostProject = () => {
                 skills: values.skills?.split(',').map(s => s.trim()) || []
             };
 
-            await axios.post(`${API_URL}/projects`, projectData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.createProject(values);
 
             message.success('Project posted successfully!');
             navigate('/browse');

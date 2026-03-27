@@ -11,6 +11,21 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  <script>
+    // Forcefully unregister any lingering service workers causing network errors
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.unregister().then(function (success) {
+            if (success) {
+              console.log('Service Worker unregistered successfully.');
+              window.location.reload(); // Reload once to bypass the interceptor
+            }
+          });
+        }
+      });
+    }
+  </script>
 </body>
 
 </html>

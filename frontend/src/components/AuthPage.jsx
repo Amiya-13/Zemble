@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Radio, Card, App as AntdApp } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
+import api from '../services/api';
 
 const AuthPage = () => {
     const navigate = useNavigate();
@@ -15,8 +13,12 @@ const AuthPage = () => {
     const onFinish = async (values) => {
         setLoading(true);
         try {
-            const endpoint = isLogin ? '/auth/login' : '/auth/register';
-            const response = await axios.post(`${API_URL}${endpoint}`, values);
+            let response;
+            if (isLogin) {
+                response = await api.login({ email: values.email, password: values.password });
+            } else {
+                response = await api.register(values);
+            }
 
             // Store token and user data
             localStorage.setItem('token', response.data.token);

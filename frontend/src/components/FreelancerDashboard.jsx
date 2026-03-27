@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, Button, Statistic, Row, Col, List, Tag, Avatar, Tabs, Spin, Empty, message } from 'antd';
-import { LogoutOutlined, UserOutlined, DollarOutlined, ProjectOutlined, TrophyOutlined, FileTextOutlined, TeamOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import {
+    UserOutlined, ProjectOutlined, RocketOutlined,
+    ClockCircleOutlined, SolutionOutlined, CheckCircleOutlined,
+    TeamOutlined, DollarOutlined, SearchOutlined, BellOutlined
+} from '@ant-design/icons';
+import api from '../services/api';
 
 const FreelancerDashboard = () => {
     const navigate = useNavigate();
@@ -29,9 +33,9 @@ const FreelancerDashboard = () => {
         try {
             const headers = { Authorization: `Bearer ${token}` };
             const [proposalsRes, projectsRes, invitesRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/proposals/my/proposals', { headers }),
-                axios.get('http://localhost:5000/api/projects/my/projects', { headers }),
-                axios.get('http://localhost:5000/api/squads/invites', { headers })
+                api.getMyProposals(),
+                api.getProjects(),
+                api.getInvites()
             ]);
             setMyProposals(proposalsRes.data.proposals || []);
             setMyProjects(projectsRes.data.projects || []);
@@ -46,9 +50,7 @@ const FreelancerDashboard = () => {
     const handleAcceptInvite = async (squadId) => {
         const token = localStorage.getItem('token');
         try {
-            await axios.put(`http://localhost:5000/api/squads/${squadId}/accept`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.acceptInvite(squadId);
             message.success('Squad invitation accepted! You are now successfully anchored to the team.');
             fetchDashboardData(token);
         } catch (error) {

@@ -34,6 +34,7 @@ function App() {
             <Route path="/post-project" element={<PostProject />} />
             <Route path="/dashboard/freelancer" element={<FreelancerDashboard />} />
             <Route path="/dashboard/client" element={<ClientDashboard />} />
+            <Route path="/squad-builder" element={<SquadBuilder />} />
             <Route path="/squad-builder/:projectId" element={<SquadBuilder />} />
             <Route path="/freelancer/:id" element={<FreelancerProfile />} />
             <Route path="/backend-demo" element={<BackendDemo />} />

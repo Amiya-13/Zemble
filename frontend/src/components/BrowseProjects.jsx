@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, Tag, Input, Select, Button, Spin, Empty } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
+import api from '../services/api';
 
 const BrowseProjects = () => {
     const navigate = useNavigate();
@@ -23,7 +21,7 @@ const BrowseProjects = () => {
             if (category) url += `category=${category}&`;
             if (search) url += `search=${search}`;
 
-            const response = await axios.get(url);
+            const response = await api.getProjects(url);
             setProjects(response.data.projects);
         } catch (error) {
             console.error('Error fetching projects:', error);

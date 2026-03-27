@@ -20,7 +20,14 @@ const app = express();
 const sentiment = new Sentiment();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: [
+        'http://localhost:5173', 
+        'https://squad-hub-12.preview.emergentagent.com',
+        'https://zemble.vercel.app'
+    ],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

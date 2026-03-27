@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, Tag, Button, Form, Input, InputNumber, message, Spin, Divider, List, Avatar } from 'antd';
-import { ClockCircleOutlined, DollarOutlined, UserOutlined, CheckCircleOutlined, TeamOutlined } from '@ant-design/icons';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
+import {
+    ClockCircleOutlined, DollarOutlined, SolutionOutlined,
+    TeamOutlined, UserOutlined, ArrowLeftOutlined,
+    RocketOutlined, CheckCircleOutlined, InfoCircleOutlined,
+    StarOutlined, SendOutlined
+} from '@ant-design/icons';
+import api from '../services/api';
 
 const ProjectDetail = () => {
     const { id } = useParams();
@@ -23,16 +26,13 @@ const ProjectDetail = () => {
 
     const fetchProject = async () => {
         try {
-            const response = await axios.get(`${API_URL}/projects/${id}`);
+            const response = await api.getProject(id);
             const projectData = response.data.project;
             setProject(projectData);
 
-            // If the current user is the owner, fetch the proposals
+            // If client viewing their own project, fetch proposals
             if ((currentUser?.id || currentUser?._id) === projectData.client?._id) {
-                const token = localStorage.getItem('token');
-                const propsRes = await axios.get(`${API_URL}/proposals/project/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const propsRes = await api.getProjectProposals(id);
                 setProposals(propsRes.data.proposals);
             }
         } catch (error) {
@@ -204,7 +204,7 @@ const ProjectDetail = () => {
 
                                                 {proposal.squad && (
                                                     <div className="mb-6 pt-4 border-t border-gray-100">
-                                                        <div className="text-sm font-semibold tracking-wide text-gray-500 uppercase mb-3">Proposed Squad: {proposal.squad.name} ({proposal.squad.members?.length} Members)</div>
+                                                        <div className="text-sm font-semibold tracking-wide text-gray-500 uppercase mb-3">Proposed Squad: {proposal.squad.name} ({(proposal.squad.members?.length || 0) + (proposal.squad.pendingInvites?.length || 0)} Members)</div>
                                                         <Avatar.Group maxCount={5} maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}>
                                                             {proposal.squad.members.map(member => (
                                                                 <Avatar key={member._id} size="large" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`} tooltip={member.profile?.firstName || member.username} />

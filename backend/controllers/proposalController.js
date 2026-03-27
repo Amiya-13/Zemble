@@ -121,7 +121,10 @@ export const getProjectProposals = async (req, res) => {
             .populate('freelancer', 'username profile rating')
             .populate({
                 path: 'squad',
-                populate: { path: 'members', select: 'username profile rating' }
+                populate: [
+                    { path: 'members', select: 'username profile rating' },
+                    { path: 'pendingInvites', select: 'username profile rating' }
+                ]
             })
             .sort({ createdAt: -1 });
 
@@ -191,12 +194,24 @@ export const rejectProposal = async (req, res) => {
 // Get my proposals (freelancer)
 export const getMyProposals = async (req, res) => {
     try {
-        const proposals = await Proposal.find({ freelancer: req.userId })
+        // Find the squads the user is part of
+        const mySquads = await Squad.find({ 
+            $or: [{ leader: req.userId }, { members: req.userId }] 
+        });
+        const squadIds = mySquads.map(s => s._id);
+
+        const proposals = await Proposal.find({ 
+            $or: [
+                { freelancer: req.userId },
+                { squad: { $in: squadIds } }
+            ]
+        })
             .populate('project', 'title status budget client')
             .populate({
                 path: 'project',
                 populate: { path: 'client', select: 'username profile' }
             })
+            .populate('squad')
             .sort({ createdAt: -1 });
 
         res.json({ success: true, proposals });
