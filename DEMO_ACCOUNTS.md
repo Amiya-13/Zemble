@@ -1,6 +1,6 @@
 # 🎭 DEMO ACCOUNTS - LOGIN READY!
 
-## ✅ No MongoDB Needed!
+## ✅ No MongoDB Needed as providing the demo accounts , but also real time db changes have been integrated so user can register and use the platform through it !
 
 The backend now works with **hardcoded mock data** - no database required!
 
