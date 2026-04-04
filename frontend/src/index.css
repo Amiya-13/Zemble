@@ -39,7 +39,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: white;
@@ -49,6 +49,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .back-btn:hover {
@@ -56,6 +57,16 @@ body {
   border-color: #94a3b8;
   color: #1e293b;
   transform: translateX(-2px);
+}
+
+/* Hide label on mobile — icon only */
+@media (max-width: 640px) {
+  .back-btn-label {
+    display: none;
+  }
+  .back-btn {
+    padding: 6px 10px;
+  }
 }
 
 /* ── Mobile Nav Dropdown ─────────────────────────────────── */

@@ -3,19 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 
 /**
- * A reusable back button that uses browser history.
- * Falls back to `fallback` route if history is empty.
+ * Reusable back button using browser history.
+ * Shows icon+label on desktop, icon-only on mobile.
  */
 const BackButton = ({ fallback = '/', label = 'Back', className = '' }) => {
     const navigate = useNavigate();
 
     const handleBack = () => {
-        // If there's history to go back to, use it; otherwise fallback
-        if (window.history.length > 1) {
-            navigate(-1);
-        } else {
-            navigate(fallback);
-        }
+        navigate(-1);
     };
 
     return (
@@ -25,7 +20,7 @@ const BackButton = ({ fallback = '/', label = 'Back', className = '' }) => {
             aria-label="Go back"
         >
             <ArrowLeftOutlined />
-            <span>{label}</span>
+            <span className="back-btn-label">{label}</span>
         </button>
     );
 };
