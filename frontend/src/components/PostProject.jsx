@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, InputNumber, Select, Button, Card, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import BackButton from './BackButton';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
@@ -52,20 +53,20 @@ const PostProject = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             {/* Header */}
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <Link to="/" className="flex items-center space-x-2">
-                        <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zemble</span>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+                    <Link to="/" className="flex items-center space-x-2 shrink-0">
+                        <span className="text-2xl sm:text-3xl">⚓</span>
+                        <span className="text-xl sm:text-2xl font-bold text-gradient">Zemble</span>
                     </Link>
-                    <Button onClick={() => navigate('/browse')}>← Back to Browse</Button>
+                    <BackButton fallback="/browse" label="Browse" />
                 </div>
             </nav>
 
-            <div className="max-w-4xl mx-auto px-6 py-12">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 <Card className="rounded-2xl shadow-2xl">
                     <div className="text-center mb-8">
                         <div className="text-5xl mb-4">📝</div>
-                        <h1 className="text-3xl font-bold mb-2">Post a New Project</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Post a New Project</h1>
                         <p className="text-gray-600">Find the perfect freelancer for your project</p>
                     </div>
 
@@ -118,7 +119,7 @@ const PostProject = () => {
                             <Input placeholder="e.g., React, Node.js, MongoDB, Tailwind CSS" />
                         </Form.Item>
 
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid sm:grid-cols-2 gap-4">
                             <Form.Item
                                 name="budgetMin"
                                 label="Minimum Budget ($)"
@@ -147,7 +148,7 @@ const PostProject = () => {
                             </Select>
                         </Form.Item>
 
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid sm:grid-cols-2 gap-4">
                             <Form.Item
                                 name="durationValue"
                                 label="Project Duration"

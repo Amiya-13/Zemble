@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, Tag, Input, Select, Button, Spin, Empty } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import BackButton from './BackButton';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
@@ -52,26 +53,29 @@ const BrowseProjects = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             {/* Header */}
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <Link to="/" className="flex items-center space-x-2">
-                        <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zemble</span>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center gap-3">
+                    <Link to="/" className="flex items-center space-x-2 shrink-0">
+                        <span className="text-2xl sm:text-3xl">⚓</span>
+                        <span className="text-xl sm:text-2xl font-bold text-gradient">Zemble</span>
                     </Link>
-                    <div className="flex space-x-4">
-                        <Button onClick={() => navigate('/login')}>Sign In</Button>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <BackButton fallback="/" label="Home" />
+                        <Button className="hidden sm:inline-flex" onClick={() => navigate('/login')}>Sign In</Button>
                         <Button type="primary" onClick={() => navigate('/post-project')}>
-                            Post a Project
+                            <span className="hidden sm:inline">Post a Project</span>
+                            <span className="sm:hidden">Post</span>
                         </Button>
                     </div>
                 </div>
             </nav>
 
             {/* Search Section */}
-            <div className="bg-white border-b border-gray-200 py-8">
-                <div className="max-w-7xl mx-auto px-6">
-                    <h1 className="text-4xl font-bold mb-6">Browse Projects</h1>
+            <div className="bg-white border-b border-gray-200 py-6 sm:py-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-5">Browse Projects</h1>
 
-                    <div className="flex gap-4">
+                    {/* Stacked on mobile, row on desktop */}
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <Input
                             size="large"
                             placeholder="Search projects..."
@@ -87,7 +91,7 @@ const BrowseProjects = () => {
                             placeholder="Category"
                             value={category}
                             onChange={setCategory}
-                            className="w-64"
+                            className="w-full sm:w-56"
                             allowClear
                         >
                             <Select.Option value="web-development">Web Development</Select.Option>
@@ -98,7 +102,7 @@ const BrowseProjects = () => {
                             <Select.Option value="data-science">Data Science</Select.Option>
                         </Select>
 
-                        <Button size="large" type="primary" onClick={handleSearch} icon={<FilterOutlined />}>
+                        <Button size="large" type="primary" onClick={handleSearch} icon={<FilterOutlined />} className="shrink-0">
                             Search
                         </Button>
                     </div>
@@ -106,7 +110,7 @@ const BrowseProjects = () => {
             </div>
 
             {/* Projects Grid */}
-            <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 {loading ? (
                     <div className="text-center py-20">
                         <Spin size="large" />
@@ -114,7 +118,7 @@ const BrowseProjects = () => {
                 ) : projects.length === 0 ? (
                     <Empty description="No projects found" />
                 ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                         {projects.map((project) => (
                             <Card
                                 key={project._id}
@@ -127,7 +131,7 @@ const BrowseProjects = () => {
                                         <Tag color={getCategoryColor(project.category)} className="mb-2">
                                             {project.category}
                                         </Tag>
-                                        <h3 className="text-xl font-bold mb-2">{project.title}</h3>
+                                        <h3 className="text-lg sm:text-xl font-bold mb-2">{project.title}</h3>
                                         <p className="text-gray-600 line-clamp-3">{project.description}</p>
                                     </div>
 

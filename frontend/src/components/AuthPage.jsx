@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Radio, Card, App as AntdApp } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import BackButton from './BackButton';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
@@ -18,13 +19,11 @@ const AuthPage = () => {
             const endpoint = isLogin ? '/auth/login' : '/auth/register';
             const response = await axios.post(`${API_URL}${endpoint}`, values);
 
-            // Store token and user data
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
 
             message.success(isLogin ? 'Login successful!' : 'Registration successful!');
 
-            // Redirect based on user type
             if (response.data.user.userType === 'client') {
                 navigate('/dashboard/client');
             } else {
@@ -38,11 +37,16 @@ const AuthPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-6">
-            <Card className="max-w-md w-full shadow-2xl rounded-2xl">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 sm:p-6">
+            <Card className="w-full max-w-md shadow-2xl rounded-2xl">
+                {/* Back button at top */}
+                <div className="mb-4">
+                    <BackButton fallback="/" label="Back to Home" />
+                </div>
+
                 <div className="text-center mb-8">
                     <div className="text-5xl mb-4">⚓</div>
-                    <h1 className="text-3xl font-bold mb-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">
                         {isLogin ? 'Welcome Back' : 'Join Zemble'}
                     </h1>
                     <p className="text-gray-600">
@@ -86,9 +90,9 @@ const AuthPage = () => {
                                 name="userType"
                                 rules={[{ required: true, message: 'Please select user type' }]}
                             >
-                                <Radio.Group>
-                                    <Radio.Button value="freelancer">Freelancer</Radio.Button>
-                                    <Radio.Button value="client">Client</Radio.Button>
+                                <Radio.Group className="w-full flex">
+                                    <Radio.Button value="freelancer" className="flex-1 text-center">Freelancer</Radio.Button>
+                                    <Radio.Button value="client" className="flex-1 text-center">Client</Radio.Button>
                                 </Radio.Group>
                             </Form.Item>
                         </>
@@ -132,12 +136,6 @@ const AuthPage = () => {
                         <Button type="link" onClick={() => setIsLogin(!isLogin)}>
                             {isLogin ? 'Need an account? Sign up' : 'Have an account? Sign in'}
                         </Button>
-                    </div>
-
-                    <div className="text-center mt-4">
-                        <Link to="/">
-                            <Button type="text">← Back to Home</Button>
-                        </Link>
                     </div>
                 </Form>
             </Card>

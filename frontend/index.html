@@ -4,28 +4,17 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Zemble — Premium Freelancer Marketplace. Build elite squads with verified talent." />
   <title>Zemble</title>
+  <!-- Preconnect for faster avatar and external asset loading -->
+  <link rel="preconnect" href="https://api.dicebear.com" />
+  <link rel="dns-prefetch" href="https://api.dicebear.com" />
 </head>
 
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-  <script>
-    // Forcefully unregister any lingering service workers causing network errors
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function (registrations) {
-        for (let registration of registrations) {
-          registration.unregister().then(function (success) {
-            if (success) {
-              console.log('Service Worker unregistered successfully.');
-              window.location.reload(); // Reload once to bypass the interceptor
-            }
-          });
-        }
-      });
-    }
-  </script>
 </body>
 
 </html>

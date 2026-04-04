@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, Button, Statistic, Row, Col, List, Tag, Avatar, Tabs, Spin, Empty, message } from 'antd';
 import { LogoutOutlined, UserOutlined, DollarOutlined, ProjectOutlined, TrophyOutlined, FileTextOutlined, TeamOutlined } from '@ant-design/icons';
+import BackButton from './BackButton';
 import axios from 'axios';
 
 const FreelancerDashboard = () => {
@@ -68,38 +69,40 @@ const FreelancerDashboard = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             {/* Header */}
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <Link to="/" className="flex items-center space-x-2">
-                        <span className="text-3xl">⚓</span>
-                        <span className="text-2xl font-bold text-gradient">Zemble</span>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center gap-3">
+                    <Link to="/" className="flex items-center space-x-2 shrink-0">
+                        <span className="text-2xl sm:text-3xl">⚓</span>
+                        <span className="text-xl sm:text-2xl font-bold text-gradient">Zemble</span>
                     </Link>
-                    <div className="flex items-center gap-4">
-                        <div className="text-right">
-                            <div className="font-semibold">{user.username}</div>
-                            <div className="text-sm text-gray-500">Freelancer</div>
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                        <BackButton fallback="/" label="Home" />
+                        {/* Username — hide on very small screens */}
+                        <div className="hidden sm:block text-right min-w-0">
+                            <div className="font-semibold truncate">{user.username}</div>
+                            <div className="text-xs text-gray-500">Freelancer</div>
                         </div>
-                        <Avatar size="large" className="bg-gradient-to-r from-blue-500 to-purple-600">
+                        <Avatar size="large" className="bg-gradient-to-r from-blue-500 to-purple-600 shrink-0">
                             {user.username?.[0]?.toUpperCase()}
                         </Avatar>
-                        <Button icon={<LogoutOutlined />} onClick={handleLogout}>
-                            Logout
+                        <Button icon={<LogoutOutlined />} onClick={handleLogout} size="small">
+                            <span className="hidden sm:inline">Logout</span>
                         </Button>
                     </div>
                 </div>
             </nav>
 
-            <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 {/* Welcome Section */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2">
+                    <h1 className="text-2xl sm:text-4xl font-bold mb-2">
                         Welcome back, {user.profile?.firstName || user.username}! 👋
                     </h1>
-                    <p className="text-gray-600 text-lg">Here's what's happening with your freelance work</p>
+                    <p className="text-gray-600 text-base sm:text-lg">Here's what's happening with your freelance work</p>
                 </div>
 
-                {/* Stats */}
-                <Row gutter={16} className="mb-8">
-                    <Col span={6}>
+                {/* Stats — 2 cols on mobile, 4 on desktop */}
+                <Row gutter={[12, 12]} className="mb-8">
+                    <Col xs={12} sm={12} md={6}>
                         <Card>
                             <Statistic
                                 title="Projects Completed"
@@ -109,7 +112,7 @@ const FreelancerDashboard = () => {
                             />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col xs={12} sm={12} md={6}>
                         <Card>
                             <Statistic
                                 title="Total Earned"
@@ -120,7 +123,7 @@ const FreelancerDashboard = () => {
                             />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col xs={12} sm={12} md={6}>
                         <Card>
                             <Statistic
                                 title="Success Rate"
@@ -131,22 +134,22 @@ const FreelancerDashboard = () => {
                             />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col xs={12} sm={12} md={6}>
                         <Card>
                             <Statistic
                                 title="Rating"
                                 value={user.rating?.average || 0}
                                 precision={1}
-                                suffix={`/ 5.0 (${user.rating?.count || 0})`}
+                                suffix={`/ 5.0`}
                                 valueStyle={{ color: '#faad14' }}
                             />
                         </Card>
                     </Col>
                 </Row>
 
-                {/* Quick Actions */}
-                <Row gutter={16}>
-                    <Col span={12}>
+                {/* Quick Actions + Profile Stats */}
+                <Row gutter={[12, 12]}>
+                    <Col xs={24} md={12}>
                         <Card title="🚀 Quick Actions" className="rounded-xl shadow-lg">
                             <div className="space-y-3">
                                 <Button
@@ -171,7 +174,7 @@ const FreelancerDashboard = () => {
                         </Card>
                     </Col>
 
-                    <Col span={12}>
+                    <Col xs={24} md={12}>
                         <Card title="📊 Profile Stats" className="rounded-xl shadow-lg">
                             <List
                                 itemLayout="horizontal"
@@ -212,14 +215,14 @@ const FreelancerDashboard = () => {
                                             onClick={() => handleAcceptInvite(squad._id)}
                                             className="bg-gradient-to-r from-orange-500 to-amber-500 border-none font-bold shadow-md"
                                         >
-                                            Accept Invite
+                                            Accept
                                         </Button>
                                     ]}
                                 >
                                     <List.Item.Meta
-                                        avatar={<Avatar size="large" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${squad.leader?.username}`} className="bg-orange-200" />}
-                                        title={<span className="font-bold text-lg">{squad.leader?.profile?.firstName || squad.leader?.username} invited you to join '{squad.name}'!</span>}
-                                        description={`Current Team Members: ${squad.members.map(m => m.profile?.firstName || m.username).join(', ')}`}
+                                        avatar={<Avatar size="large" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${squad.leader?.username}`} />}
+                                        title={<span className="font-bold">{squad.leader?.profile?.firstName || squad.leader?.username} invited you to '{squad.name}'!</span>}
+                                        description={`Members: ${squad.members.map(m => m.profile?.firstName || m.username).join(', ')}`}
                                     />
                                 </List.Item>
                             )}
@@ -232,7 +235,7 @@ const FreelancerDashboard = () => {
                     <Card title="💡 Your Skills" className="mt-6 rounded-xl shadow-lg mb-8">
                         <div className="flex flex-wrap gap-2">
                             {user.profile.skills.map((skill, idx) => (
-                                <Tag key={idx} color="blue" className="text-base px-4 py-2">
+                                <Tag key={idx} color="blue" className="text-sm px-3 py-1">
                                     {skill}
                                 </Tag>
                             ))}
@@ -252,7 +255,7 @@ const FreelancerDashboard = () => {
                             items={[
                                 {
                                     key: 'proposals',
-                                    label: <span className="text-lg"><FileTextOutlined /> My Submitted Proposals ({myProposals.length})</span>,
+                                    label: <span><FileTextOutlined /> Proposals ({myProposals.length})</span>,
                                     children: (
                                         <div className="pt-4">
                                             {myProposals.length === 0 ? (
@@ -262,37 +265,37 @@ const FreelancerDashboard = () => {
                                                     itemLayout="vertical"
                                                     dataSource={myProposals}
                                                     renderItem={proposal => (
-                                                        <List.Item className="bg-gray-50 rounded-lg mb-4 p-6 border border-gray-200">
-                                                            <div className="flex justify-between items-start mb-4">
+                                                        <List.Item className="bg-gray-50 rounded-lg mb-4 p-4 sm:p-6 border border-gray-200">
+                                                            <div className="flex flex-wrap justify-between items-start mb-4 gap-2">
                                                                 <div>
-                                                                    <h3 className="text-xl font-bold text-blue-600">
+                                                                    <h3 className="text-base sm:text-xl font-bold text-blue-600">
                                                                         <Link to={`/project/${proposal.project?._id}`}>{proposal.project?.title}</Link>
                                                                     </h3>
-                                                                    <div className="text-gray-500 mt-1">
+                                                                    <div className="text-gray-500 text-sm mt-1">
                                                                         Client: {proposal.project?.client?.username}
                                                                     </div>
                                                                 </div>
-                                                                <Tag color={proposal.status === 'pending' ? 'gold' : proposal.status === 'accepted' ? 'green' : 'red'} className="text-sm px-3 py-1">
+                                                                <Tag color={proposal.status === 'pending' ? 'gold' : proposal.status === 'accepted' ? 'green' : 'red'}>
                                                                     {proposal.status.toUpperCase()}
                                                                 </Tag>
                                                             </div>
-                                                            <Row gutter={24} className="mb-4">
-                                                                <Col span={8}>
-                                                                    <div className="text-gray-500">Your Bid Amount</div>
-                                                                    <div className="font-semibold text-lg">${proposal.bidAmount}</div>
+                                                            <Row gutter={[12, 8]} className="mb-4">
+                                                                <Col xs={12} sm={8}>
+                                                                    <div className="text-gray-500 text-xs">Your Bid</div>
+                                                                    <div className="font-semibold">${proposal.bidAmount}</div>
                                                                 </Col>
-                                                                <Col span={8}>
-                                                                    <div className="text-gray-500">Proposed Time</div>
-                                                                    <div className="font-semibold text-lg">{proposal.deliveryTime?.value} {proposal.deliveryTime?.unit}</div>
+                                                                <Col xs={12} sm={8}>
+                                                                    <div className="text-gray-500 text-xs">Proposed Time</div>
+                                                                    <div className="font-semibold">{proposal.deliveryTime?.value} {proposal.deliveryTime?.unit}</div>
                                                                 </Col>
-                                                                <Col span={8}>
-                                                                    <div className="text-gray-500">Project Budget</div>
-                                                                    <div className="font-semibold text-lg">${proposal.project?.budget?.min} - ${proposal.project?.budget?.max}</div>
+                                                                <Col xs={24} sm={8}>
+                                                                    <div className="text-gray-500 text-xs">Budget</div>
+                                                                    <div className="font-semibold">${proposal.project?.budget?.min} - ${proposal.project?.budget?.max}</div>
                                                                 </Col>
                                                             </Row>
                                                             <div>
-                                                                <div className="font-semibold mb-1">Cover Letter:</div>
-                                                                <p className="text-gray-600 line-clamp-3">{proposal.coverLetter}</p>
+                                                                <div className="font-semibold mb-1 text-sm">Cover Letter:</div>
+                                                                <p className="text-gray-600 line-clamp-3 text-sm">{proposal.coverLetter}</p>
                                                             </div>
                                                         </List.Item>
                                                     )}
@@ -303,23 +306,23 @@ const FreelancerDashboard = () => {
                                 },
                                 {
                                     key: 'projects',
-                                    label: <span className="text-lg"><ProjectOutlined /> My Active Projects ({myProjects.length})</span>,
+                                    label: <span><ProjectOutlined /> Projects ({myProjects.length})</span>,
                                     children: (
                                         <div className="pt-4">
                                             {myProjects.length === 0 ? (
                                                 <Empty description="No projects assigned to you yet." />
                                             ) : (
                                                 <List
-                                                    grid={{ gutter: 16, column: 2 }}
+                                                    grid={{ gutter: 16, xs: 1, sm: 2 }}
                                                     dataSource={myProjects}
                                                     renderItem={project => (
                                                         <List.Item>
                                                             <Card hoverable className="h-full border border-gray-200" onClick={() => navigate(`/project/${project._id}`)}>
                                                                 <Tag color="cyan" className="mb-2">{project.category}</Tag>
-                                                                <h3 className="text-xl font-bold mb-2">{project.title}</h3>
+                                                                <h3 className="text-lg font-bold mb-2">{project.title}</h3>
                                                                 <div className="text-gray-500 text-sm mb-4 line-clamp-2">{project.description}</div>
                                                                 <div className="flex justify-between items-center border-t pt-4 mt-auto">
-                                                                    <span className="font-semibold text-green-600">Budget: ${project.budget?.min} - ${project.budget?.max}</span>
+                                                                    <span className="font-semibold text-green-600 text-sm">${project.budget?.min} - ${project.budget?.max}</span>
                                                                     <Tag color="blue">{project.status}</Tag>
                                                                 </div>
                                                             </Card>
